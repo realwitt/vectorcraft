@@ -1357,6 +1357,8 @@
 	Internal CSS	Internes CSS
 	Internet Standard RGB (sRGB)	Internet-Standard-RGB (sRGB)
 	Intersect	Schnittmenge bilden
+	Intertwine	Verflechten
+	Arrange Intertwine Area	Überlappungsbereich verflechten
 	Inverse	Auswahl umkehren
 	Invert	Umkehren
 	Invert Colors	Farben umkehren
@@ -3806,6 +3808,7 @@ theme	Appearance	Erscheinungsbild
 @msg	select a gradient mesh	wählen Sie ein Verlaufsgitter aus
 @msg	select a linked image: an embedded one has no file	wählen Sie ein verknüpftes Bild aus: Ein eingebettetes hat keine Datei
 @msg	select a repeat	wählen Sie eine Wiederholung aus
+@msg	select an Intertwine group	wählen Sie eine Verflechtungsgruppe aus
 @msg	select a stroke with a variable width	wählen Sie eine Kontur mit variabler Breite aus
 @msg	select a symbol instance	wählen Sie eine Symbolinstanz aus
 @msg	select an Image Trace object	wählen Sie ein Bildnachzeichner-Objekt aus
@@ -3972,6 +3975,8 @@ theme	Appearance	Erscheinungsbild
 @msg	{_1} files	{_1}-Dateien
 @msg	The graphics were lost and have been restarted	Die Grafikausgabe ging verloren und wurde neu gestartet
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Der zuerst verwendete Grafikprozessor konnte das Fenster nicht anzeigen, daher wurde VectorCraft auf {summary} neu gestartet
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Der letzte Start von VectorCraft endete auf {name}, bevor das Fenster erschien, daher wurde VectorCraft auf {summary} gestartet. Um diesen Grafikprozessor erneut zu versuchen, ändern Sie Voreinstellungen › Leistung › Grafikprozessor oder starten Sie mit gesetzter Variable WGPU_BACKEND
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Der letzte Start von VectorCraft endete beim Auflisten der Grafikprozessoren, daher wurde VectorCraft auf {summary} nur mit OpenGL gestartet. Um die anderen Grafikschnittstellen erneut zu versuchen, ändern Sie Voreinstellungen › Leistung › Grafikprozessor oder starten Sie mit gesetzter Variable WGPU_BACKEND
 @msg	Loading VectorCraft…	VectorCraft wird geladen…
 @msg	VectorCraft failed to start: {e}	VectorCraft konnte nicht gestartet werden: {e}
 @msg	A browser with WebGPU or WebGL2 is required.	Ein Browser mit WebGPU oder WebGL2 ist erforderlich.
@@ -4177,6 +4182,9 @@ theme	Appearance	Erscheinungsbild
 	Blocks	Blöcke
 	Frosted	Mattiert
 	Tiny Lens	Kleine Linsen
+	Loaded Texture	Geladene Struktur
+	Load Texture…	Struktur laden…
+	Texture Image	Strukturbild
 	Canvas	Leinwand
 	Highlight Variable	Variable hervorheben
 	New Variable	Neue Variable
@@ -4361,6 +4369,7 @@ theme	Appearance	Erscheinungsbild
 @msg	unknown parameter `{key}`; the command takes: {keys}	unbekannter Parameter `{key}`; der Befehl akzeptiert: {keys}
 	Load EPS into Clipboard	EPS in die Zwischenablage laden
 @msg	an image of {w} × {h} pixels is too large to draw	ein Bild mit {w} × {h} Pixeln ist zu groß, um gezeichnet zu werden
+@msg	the image can't be read as a texture	das Bild kann nicht als Struktur gelesen werden
 	Basic	Basis
 	Fill and Stroke Controls	Steuerelemente für Fläche und Kontur
 	Coloring Controls	Steuerelemente für Farbe
@@ -4408,6 +4417,7 @@ theme	Appearance	Erscheinungsbild
 @msg	the FreeHand file has a record whose size is not known	die FreeHand-Datei enthält einen Datensatz, dessen Größe nicht bekannt ist
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	nicht unterstützte FreeHand-Version {n}: VectorCraft öffnet FreeHand 8 bis MX (11); öffnen Sie sie in einem neueren FreeHand und speichern Sie, oder exportieren Sie sie als EPS, PDF oder AI
 
+	Registration:	Registrierung:
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Bemaßung
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Zeichnung : reale Größe — 1:10 beschriftet 1 Einheit auf der Seite als 10.
@@ -4458,3 +4468,23 @@ theme	Appearance	Erscheinungsbild
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Schließt die kreisförmigen Enden offener Profile. Bei einer Teildrehung bleiben die Schnittseiten offen.
 	Distance	Abstand
+@msg	span must be "object" or "selection", got {v}	span muss "object" oder "selection" sein, nicht {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" platziert einen `gradient`, kein Farbfeld
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" platziert einen Verlauf: geben Sie `gradient` an
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" platziert einen linearen oder radialen Verlauf, keinen Freiform-Verlauf
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" platziert den Verlauf selbst: lassen Sie `start` und `end` weg (sie platzieren ihn bereits in Dokumentkoordinaten)
+	Make Image Dynamic	Bild dynamisch machen
+	Import Data Sets…	Datensätze importieren…
+	Export Data Sets…	Datensätze exportieren…
+	Make Graph Dynamic	Diagramm dynamisch machen
+	Batch…	Stapelverarbeitung…
+	Source Folder:	Quellordner:
+	Destination Folder:	Zielordner:
+	Overrides	Überschreibungen
+	Uses every data set of the open document.	Verwendet jeden Datensatz des geöffneten Dokuments.
+@msg	Batch: {count} processed	Stapelverarbeitung: {count} verarbeitet
+@msg	Batch: {count} processed, {failed} failed	Stapelverarbeitung: {count} verarbeitet, {failed} fehlgeschlagen
+@msg	choose a destination folder	wählen Sie einen Zielordner
+@msg	choose a source folder	wählen Sie einen Quellordner
+@msg	open a document with data sets	öffnen Sie ein Dokument mit Datensätzen
+@msg	the action has no steps	die Aktion hat keine Schritte

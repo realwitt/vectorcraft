@@ -1316,6 +1316,8 @@
 	Internal CSS	内部 CSS
 	Internet Standard RGB (sRGB)	互联网标准 RGB (sRGB)
 	Intersect	交集
+	Intertwine	交织
+	Arrange Intertwine Area	排列交织区域
 	Inverse	反向
 	Invert	反相
 	Invert Colors	反相颜色
@@ -3849,6 +3851,9 @@ effect	Vertical	垂直
 	Blocks	块状
 	Frosted	磨砂
 	Tiny Lens	小镜头
+	Loaded Texture	已载入的纹理
+	Load Texture…	载入纹理…
+	Texture Image	纹理图像
 	Rename Data Set	重命名数据集
 	Rename Variable	重命名变量
 	Variable Options	变量选项
@@ -4016,6 +4021,7 @@ lighting	Light	光源
 @msg	the FreeHand file claims more entries than can be read	FreeHand 文件声明的条目数超过了可读取的上限
 @msg	the FreeHand file has a record whose size is not known	FreeHand 文件含有一条大小未知的记录
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	不支持的 FreeHand 版本 {n}：VectorCraft 打开 FreeHand 8 到 MX（11）；请用较新的 FreeHand 打开并保存，或导出为 EPS、PDF 或 AI
+	Registration:	对齐点:
 # Dimension tool (linked dimension annotations)
 	Create Dimension	创建尺寸标注
 	Dimension Tool	尺寸标注工具
@@ -4025,7 +4031,6 @@ lighting	Light	光源
 	Precision:	精度：
 	Update Dimensions	更新尺寸标注
 	Display	显示
-
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	尺寸
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	图纸 : 实际尺寸 — 1:10 会将页面上的 1 个单位标注为 10。
@@ -4045,3 +4050,12 @@ lighting	Light	光源
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	封闭开放轮廓的圆形端部。部分旋转的切割侧面保持开放。
 	Distance	距离
+	Make Image Dynamic	使图像动态化
+	Import Data Sets…	导入数据集…
+	Export Data Sets…	导出数据集…
+	Make Graph Dynamic	使图表动态化
+	Batch…	批处理…
+	Source Folder:	源文件夹：
+	Destination Folder:	目标文件夹：
+	Overrides	覆盖
+	Uses every data set of the open document.	使用打开文档的每个数据集。

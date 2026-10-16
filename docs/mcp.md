@@ -260,7 +260,7 @@ The older names below remain listed because existing workflows use them.
 |---|---|
 | `command_list` | Optional `filter`, `enabled_only`; returns the command array |
 | `command_run` | `id`, optional `params`; runs the command through the existing backend. An unknown key in `params` is an error that names it and the nearest key the command takes (`invalid parameters for `file.new`: unknown parameter `widht`; did you mean `width`?`), so a misspelt key no longer runs the command with its default (see [Parameter keys](#parameter-keys)) |
-| `command_batch` | `steps: [{id, params?}]` (at most 256), optional `stop_on_error` (default true), `atomic` and `label`; returns `completed`, `failed`, `results: [{ok, result\|error}]`. Each edit has its own undo step, or with `atomic: true` the batch's edits are one undo step named `label` (else after its first edit; `edit.undoGroup.begin`/`end` underneath); failures set `isError`. A param string `"$N.path"` or `"$last.path"` takes a value from an earlier step's result (see `run` below). Kept step results total at most 8 MiB; past that the batch stops with the reason |
+| `command_batch` | `steps: [{id, params?}]` (at most 256), optional `stop_on_error` (default true), `atomic` and `label`; returns `completed`, `failed`, `results: [{ok, result\|error}]` and `created` (the ids the `draw_path` / `draw_shape` steps made, in order). A step's `id` is a command id, or `draw_path` / `draw_shape` with that tool's arguments as `params` (checked as `tools/call` checks them; the step's result is the tool's, so `"$N.id"` is the new object). Each edit has its own undo step, or with `atomic: true` the batch's edits are one undo step named `label` (else after its first edit; `edit.undoGroup.begin`/`end` underneath); failures set `isError`. A param string `"$N.path"` or `"$last.path"` takes a value from an earlier step's result (see `run` below). Kept step results total at most 8 MiB; past that the batch stops with the reason. This is the MCP tool, not the engine command `command.batch` (that one takes `commands: [{command, params}]` and is what the Actions panel plays); use `command_run` with `command.batch` when replaying a recorded action |
 | `doc_inspect` | Optional `depth`, `childLimit`; same summary as `inspect_document` |
 | `render_preview` | Optional `max_side` (1–4096, default 1024) and `artboard` (0-based, default 0); inline PNG of that artboard without editing it. Artboards too large to render within the allocation bound return a tool error |
 | `ui_inspect`, `ui_screenshot` | Connected desktop state/window capture; tool errors in headless mode |
@@ -274,10 +274,21 @@ currently describes them in prose, so MCP does not guess schemas or silently rem
 
 Coordinates are points in document space: y points down, the origin is the first artboard's top-left, and a new
 document is 612 × 792 (US Letter). New objects become the selection. Most commands act on the selection or on
-explicit `ids`.
+explicit `ids`. A command that leaves out an object selected inside a selected group also leaves it out when `ids`
+list it together with a group that holds it.
 
 Paint values (`fill`, `stroke`) accept `"#rrggbb"`, `"none"`, `[r,g,b]` (0..1), `{"c","m","y","k"}`, `{"gray"}`,
 or a full `paint.setFill` params object (`{"gradient": …}`, `{"swatch": "name"}`).
+For `draw_shape` and `draw_path`, omitted paint fields inherit the current [new-art appearance](#new-art). Both
+also style the new object in the same call: `dash` (lengths, or null for solid), `cap`
+(butt|round|square) and `join` (miter|round|bevel) go to `stroke.set` with `strokeWidth`; `opacity` (0–100 %)
+and `name` to `object.setProps`; `effects: [{effect, params?}]` are applied in order as `apply_effect`
+does, to the whole object. They are checked before anything is drawn (effect ids against `effect.list`),
+so a bad one draws nothing. The reply adds `name`, `opacity` and `effects` (each `effect.apply` result)
+when given; `paint` lists the stroke options applied.
+A gradient given to several objects fits each one's own bounds; `paint.setFill` / `paint.setStroke` with
+`span: "selection"` place a linear or radial gradient once on the union of the targets' bounds instead, so one
+ramp runs across them.
 For `draw_shape` and `draw_path`, omitted paint fields inherit the current [new-art appearance](#new-art).
 For a filled shape or path without an outline, pass an explicit `fill` and `stroke: "none"`.
 Lines start with no fill and a visible stroke.
@@ -295,8 +306,8 @@ objects' fills or strokes differ (`fillMixed` / `strokeMixed`, drawn as a "?" pr
 | `inspect_ui` | `{}` | UI state. Remote mode only. |
 | `select_tool` | `{tool}` | `selection`, `directSelection`, `pen`, `rectangle`, `ellipse`, `polygon`, `star`, `lineSegment`, … |
 | `pointer_gesture` | `{events:[{kind,x,y,mods?}], tool?, mods?}` | `kind` is one of `down`, `drag`, `up`, `move`, `doubleclick`. Events go through the same path as the mouse. |
-| `draw_path` | `{points \| d, closed?, fill?, stroke?, strokeWidth?}` | `points` is `[[x,y],…]` or `[{x,y,in?,out?,smooth?},…]`. `d` is SVG path data. |
-| `draw_shape` | `{shape, …geometry, fill?, stroke?, strokeWidth?}` | `rectangle`/`ellipse`: `x,y,width,height` (plus `radius` for corners). `polygon`: `cx,cy,radius,sides`. `star`: `cx,cy,radius1,radius2,points`. `line`: `x1,y1,x2,y2`. |
+| `draw_path` | `{points \| d, closed?, fill?, stroke?, strokeWidth?, dash?, cap?, join?, opacity?, name?, effects?}` | `points` is `[[x,y],…]` or `[{x,y,in?,out?,smooth?},…]`. `d` is SVG path data. The options are below. |
+| `draw_shape` | `{shape, …geometry, fill?, stroke?, strokeWidth?, dash?, cap?, join?, opacity?, name?, effects?}` | `rectangle`/`ellipse`: `x,y,width,height` (plus `radius` for corners). `polygon`: `cx,cy,radius,sides`. `star`: `cx,cy,radius1,radius2,points`. `line`: `x1,y1,x2,y2`. |
 | `set_paint` | `{fill?, stroke?, strokeWidth?, ids?}` | Applies to the selection (or `ids`) and becomes the default for new art. |
 | `press_key` | `{key, mods?}` | Remote: a real key event. Headless: runs the command or tool bound to that shortcut, or sends the key to the busy tool (digits too: `5` while dragging with the Perspective Selection tool). |
 | `type_text` | `{text}` | Remote only. |
@@ -305,6 +316,8 @@ objects' fills or strokes differ (`fillMixed` / `strokeMixed`, drawn as a "?" pr
 | `screenshot` | `{path?, scale?, artboard?, window?}` | Returns MCP image content (`image/png`, base64) plus a text block. Renders the artboard; `window:true` captures the app window (remote only). With `path` the backend (the headless session or the app) writes the PNG there too. |
 | `open_file` | `{path}` | Opens any readable file as a new active document: `.vectorcraft`/`.drawcraft`, `.vctemplate`, `.svg`/`.svgz`, `.pdf`/`.ai`, `.ait`, `.eps`, `.dxf`, `.emf`, `.wmf`, PNG, JPEG, GIF, WebP, TIFF, BMP, PSD/PSB (an image opens as a document of its pixel size; a Photoshop file as its merged image). Templates (`.vctemplate`, `.ait`) open as a new untitled document. PDF, `.ai` and SVG files saved with Preserve Editing reopen as the document they carry. The reply is `document.open`'s: its `warnings` say what didn't come in as it was (an EPS whose PostScript can't be read opens as its preview, and the warning names the PostScript error, the operator and the procedure). `run_command document.formats` lists the formats. |
 | `save_file` | `{path?}` | Runs `document.save`: the document's own file in its own format (native `.vectorcraft` unless it was opened from or saved as SVG, PDF or a restorable `.ai`; then `warnings` say what that format loses). A path's extension picks the format (`.vectorcraft`, `.vctemplate`, `.pdf`, `.svg`, `.svgz`, `.ai`: a PDF carrying the native document, which reopens editable). |
+| `export` | `{path?, format?, scale?, artboard?, range?, selection?, outlineText?, options?}` | `svg`, `svgz`, `pdf`, `eps`, `dxf`, `emf`, `wmf`, `png`, `jpg`, `webp`, `gif`, `png8` (an indexed `.png`), `tiff`, `bmp`, `tga`, `psd` (layered), `txt` (the document's text), `vectorcraft` or `template` (a native template). The tool's `format` enum and `document.formats` list them, generated from the engine's format table. When `format` is omitted, it comes from the path's extension. PDF writes one page per artboard: all of them, or `artboard` (0-based) / `range` (`"1-3, 5"`, 1-based); the other formats write one artboard. `options` carries more format options (e.g. `{"quality": 80}` for JPEG). `selection: true` exports the selected objects cropped to their bounds (the reply adds their `bounds`, and reports `format` and the encoder's `warnings` as a whole-document export does); `outlineText: true` writes SVG text as paths. Template layers are left out, live effects are kept, and exporting `vectorcraft` never changes the document's path. Without `path` the bytes come back as `dataBase64`. Both backends run the same `document.export` call. |
+| `add_text` | `{text, x?, y?, width?, height?, fit?, fitMinPercent?, path?, mode?, pathEffect?, size?, font?, color?, justify?, vertical?}` | Point type at (x, y) (`justify`: `left`, `center` or `right` starts, centres or ends each line on x); area type with `width`/`height` (`fit`: `none`, `autoHeight`, `shrinkText`, as `text.areaOptions`); or `path` + `mode` (`area`/`onPath`) to flow text in or along a path, with `pathEffect` (`rainbow`, `skew`, `3dRibbon`, `stairStep`, `gravity`); `justify` (also `auto`, `justifyAll`) aligns the paragraphs of every kind, as `text.setStyle` does later. `vertical: true` uses the existing vertical writing mode for every kind (default `false`, horizontal). Returns `{id}`, with `overflow: true` when the text doesn't fit its frame or path. |
 | `export` | `{path?, format?, scale?, artboard?, range?, selection?, outlineText?, options?}` | `svg`, `svgz`, `pdf`, `ai` (the PDF-compatible `.ai` that Save writes, which carries the document when every artboard is written in order), `eps`, `dxf`, `emf`, `wmf`, `png`, `jpg`, `webp`, `gif`, `png8` (an indexed `.png`), `tiff`, `bmp`, `tga`, `psd` (layered), `txt` (the document's text), `vectorcraft` or `template` (a native template). The tool's `format` enum and `document.formats` list them, generated from the engine's format table. When `format` is omitted, it comes from the path's extension. PDF and `.ai` write one page per artboard: all of them, or `artboard` (0-based) / `range` (`"1-3, 5"`, 1-based). SVG, SVGZ and EPS write one file per chosen artboard. Rasters, DXF, EMF and WMF write one artboard, or one file per chosen artboard with `options: {"useArtboards": true}`. `options` carries more format options (e.g. `{"quality": 80}` for JPEG). `selection: true` exports the selected objects cropped to their bounds (the reply adds their `bounds`, and reports `format` and the encoder's `warnings` as a whole-document export does); `outlineText: true` writes SVG text as paths. Template layers are left out, live effects are kept, and exporting `vectorcraft` never changes the document's path. Without `path` the bytes come back as `dataBase64`. Both backends run the same `document.export` call. |
 | `add_text` | `{text, x?, y?, width?, height?, fit?, fitMinPercent?, path?, mode?, pathEffect?, size?, font?, color?, justify?}` | Point type at (x, y) (`justify`: `left`, `center` or `right` starts, centres or ends each line on x); area type with `width`/`height` (`fit`: `none`, `autoHeight`, `shrinkText`, as `text.areaOptions`); or `path` + `mode` (`area`/`onPath`) to flow text in or along a path, with `pathEffect` (`rainbow`, `skew`, `3dRibbon`, `stairStep`, `gravity`); `justify` (also `auto`, `justifyAll`) aligns the paragraphs of every kind, as `text.setStyle` does later. Returns `{id}`, with `overflow: true` when the text doesn't fit its frame or path. |
 | `apply_effect` | `{effect?, params?, ids?}` | Appends a live effect. Without `effect`, returns the effect catalogue with parameters and defaults. |
@@ -313,6 +326,16 @@ objects' fills or strokes differ (`fillMixed` / `strokeMixed`, drawn as a "?" pr
 | `create_graph` | `{type?, x, y, width, height, csv? \| series?, categories?, rows?}` | The nine Illustrator graph types: column, stacked column, bar, stacked bar, line, area, scatter, pie and radar. An empty CSV cell or a `null` in `rows` is a blank value; a number in straight quotes is a label. Edit later with `graph.setData` / `graph.setType` via `run_command`. |
 | `text_wrap` | `{ids?, offset?, invert?, release?}` | Area type below the objects (same layer) flows around them. |
 | `undo` / `redo` | `{}` | Many calls that change nothing record no undo step, for example `object.align` with nothing to move, `object.move` by 0 without `copy` and `object.showAll` with nothing hidden. `undo` (`edit.undo`) after such a call undoes the step before it. `inspect_document` lists the undo steps as `history`. |
+
+For example, create editable Japanese area type with the engine's vertical writing mode:
+
+```json
+{"name":"add_text","arguments":{"text":"こんにちは","x":40,"y":40,"width":160,"height":240,"size":20,"vertical":true}}
+```
+
+`vertical` also applies to point type and to `path` + `mode` (`area` or `onPath`). Omit it or pass `false`
+for horizontal writing. This is the same option as `text.create` / `text.createInPath`; it does not change
+the engine's existing glyph orientation or CJK composition.
 
 For SVG/SVGZ, `export`'s top-level `outlineText: true` writes text as paths; DXF takes it too (its type is outlined anyway unless `preserve: editability`).
 PDF instead uses `options: {"advanced": {"outlineText": true}}`; its default is false (live text).
@@ -964,9 +987,17 @@ already walks Image Trace. Short agent entry points:
   `symbol.replace`, `symbol.edit`, `symbol.duplicate`, `symbol.selectInstances {name}`.
 - Brushes: `brush.list`, `brush.get {name}`, `brush.apply {name, ids?}`, `brush.new {type, name?, params?, ids?}`,
   `brush.setCurrent {name}`, `brush.options {name, params?}`, `brush.freehand`, `object.expandBrush {ids?}`.
-- Variables: `variable.list`, `variable.define {name, kind: text|visibility}`, `variable.bind {variable, ids?}`,
-  `variable.makeTextDynamic`, `variable.makeVisibilityDynamic`, `variable.unbind`, `dataset.new` / `dataset.set` /
-  `dataset.select`.
+- Variables: `variable.list`, `variable.define {name, kind: text|visibility|image|graph}`, `variable.bind {variable, ids?}`,
+  `variable.makeTextDynamic`, `variable.makeVisibilityDynamic`, `variable.makeImageDynamic`, `variable.makeGraphDynamic`,
+  `variable.unbind`, `variable.rename`, `variable.delete`, `variable.highlight` (image values are file paths, graph
+  values CSV as `graph.setData`).
+- Data sets: `dataset.list`, `dataset.new {name, values?}`, `dataset.set {name, values?}`, `dataset.rename`,
+  `dataset.delete`, `dataset.capture`, `dataset.update`, `dataset.select {name}`, `dataset.next` /
+  `dataset.prev` (each `dataset.select` / next / prev is one undo step over every bound object), `dataset.import {path|data|dataBase64|csv}` /
+  `dataset.export {path?}` (CSV: `name`, then one column per variable).
+- Batch: `action.batch {commands, source?: folder|datasets, folder?, destination?: none|saveAndClose|folder,
+  destinationFolder?, overrideOpen?, overrideSave?, overrideExport?, includeSubdirs?, stopOnError?}` plays an
+  action on every file in a folder or every data set (the Actions panel menu's Batch…).
 - Image Trace: `imageTrace.presets`, `imageTrace.make {id?, preset?, params?, view?}` (or `imageTrace.makeAndExpand`),
   `imageTrace.setView`, `imageTrace.expand`, `imageTrace.release`.
 
@@ -981,7 +1012,11 @@ variables of the same kind on one object, the one defined last wins.
 {"name":"run_command","arguments":{"command":"symbol.list","params":{}}}
 {"name":"run_command","arguments":{"command":"brush.list","params":{}}}
 {"name":"run_command","arguments":{"command":"variable.list","params":{}}}
+{"name":"run_command","arguments":{"command":"dataset.list","params":{}}}
+{"name":"run_command","arguments":{"command":"dataset.capture","params":{}}}
+{"name":"run_command","arguments":{"command":"dataset.select","params":{"name":"Data Set 1"}}}
 {"name":"run_command","arguments":{"command":"imageTrace.presets","params":{}}}
+{"name":"run_command","arguments":{"command":"command.batch","params":{"label":"Offset","commands":[{"command":"object.move","params":{"dx":10,"dy":10,"copy":true}}]}}}
 ```
 
 `dataset.update {all?}` writes what the bound objects hold now into the active data set, for each variable that the
@@ -1615,11 +1650,11 @@ the path it had begun while that stays selected. Its reply's `tool` is the tool 
 The Curvature tool edits any selected path, whatever drew it, keeping its shape except where edited (#798). Each edit
 is one undo step and leaves the anchor it edited direct-selected (the tool's current point):
 `path.curvatureEdit {id, subpath?, op, …}` answers `{anchor}`. `op: "move"` with `anchor`, `x`, `y` moves a point and
-re-curves only its two segments: a smooth point turns along the line through its neighbours, and the neighbours'
-handles keep their directions (their lengths scale with the chord), so the segments beyond don't change.
+re-curves only its two segments: a smooth point takes the tool's handles (along the circle through it and its neighbours; the one handle into
+the curve at an end), and the neighbours' handles keep their directions (their lengths scale with the chord), so the segments beyond don't change.
 `op: "insert"` with `segment`, `t` adds a smooth point there without changing the shape (with `x`, `y` it is then
 moved there: the tool's click-and-drag on a segment). `op: "extend"` with `x`, `y` goes on from the `end` (default)
-or the `start` of an open subpath, and `op: "close"` closes it from that end; `from` says how the old end bends into
+or the `start` of an open subpath (the new end curves into the path unless `corner` is true), and `op: "close"` closes it from that end; `from` says how the old end bends into
 the new segment: `"keep"` (default) keeps its curve, `"smooth"` curves it through its neighbours (a point the tool
 placed), `"corner"` leaves it without handles. Alt-click or double-click toggles a point with `path.convertAnchor`, and
 Backspace/Delete removes the current point with `path.removeAnchor`.
@@ -1664,11 +1699,21 @@ the other model (`preserveNumbers`: colours already in it keep their numbers); g
 too and printer's marks are not. The destination is any profile `edit.colorSettings` lists (default: the document's
 for its colour mode). `profiles` (`all`, `destination`, or `taggedSource` for a document assigned profiles with
 `edit.assignProfile`) writes colours in ICC-based spaces with their profiles embedded: CMYK with the destination's or
-the document's CMYK profile, RGB as sRGB, grey with the sRGB tone curve. `outputIntent` embeds a profile as the file's
+the document's CMYK profile, RGB as sRGB, grey with the sRGB tone curve (PDF/A, PDF/X-3 and PDF/X-4 files are
+always tagged, whatever `profiles` says). `outputIntent` embeds a profile as the file's
 `/GTS_PDFX` output intent with `outputCondition`, `outputConditionId` and `registry`, and `trapped` sets `/Trapped`
 (PDF/A files keep their own output intent). Type is written as selectable, searchable text in embedded subset fonts
 with a ToUnicode map (fonts whose licence forbids embedding stay outlines, with a warning); `advanced: {outlineText:
-true}` writes every glyph as an outline instead.
+true}` writes every glyph as an outline instead. Type that Transform effects only move and copy (no scale, rotation,
+reflection or Random) is written as text once in each place when its characters are in solid colors without underline
+or strikethrough, the type object has no fills or strokes of its own, no inline graphics and no perspective, its
+transform does not scale or shear stroked characters, and the copies do not overlap. When the effect is on the type
+itself, the type can also have transparency, an opacity mask and raster effects such as a drop shadow. When the effect
+is on the group or layer holding the type, the type has no transparency or effects of its own and is not in a clipping
+path, the group or layer has no fill, stroke or Pathfinder effect of its own, and no group between them has a fill,
+stroke, Pathfinder or geometry effect. Type is written as outlines when the effect stops its copies early, or when the
+copies would number more than 10,000 or take more than 20,000,000 bytes of document data. Other type under a geometry
+effect is written as outlines.
 
 ```json
 {"name":"run_command","arguments":{"command":"document.exportPdf","params":{"path":"/tmp/press.pdf","output":{"conversion":"preserveNumbers","destination":"VectorCraft Generic CMYK (SWOP-like)","profiles":"destination","outputIntent":"VectorCraft Generic CMYK (SWOP-like)","trapped":true},"advanced":{"outlineText":false}}}}
@@ -1768,7 +1813,10 @@ for `edit.pasteInPlace`, `edit.pasteInFront` and `edit.pasteInBack`, and to each
 none, when the step runs. When the document a step runs in has no artboard at that index (for example, after an
 earlier step deleted the active artboard when it was the last one), the step gets that document's last artboard. In
 remote mode, MCP's `run_command` calls and each step of the `command_batch` tool get the active artboard too. The
-Actions panel plays an action as a `command.batch`. An action recorded in the Actions panel leaves the artboard out,
+Actions panel plays an action as a `command.batch`. The Actions panel menu's Batch… runs
+`action.batch`: the same steps on every readable file in a folder (or every data set of the open document), with
+destination `none` | `saveAndClose` | `folder` and Override Open / Save / Export. Caps: 500 files or data sets, 8
+folder levels, 256 steps. An action recorded in the Actions panel leaves the artboard out,
 and its steps of these commands get the artboard that is active when the action plays. A press with the Selection,
 Direct Selection or Group Selection tool inside an artboard makes that artboard the active one; with the Selection
 tool, a Shift-click on an empty spot inside an artboard makes it active and keeps the selection. Choosing the Artboard
@@ -2050,7 +2098,9 @@ report warn about it).
 ## Units
 
 Commands take and return lengths in points (the distances of `object.path.offsetPath`, `object.path.simplify`,
-`object.path.splitIntoGrid` and `text.setStyle` `size`/`leading` also take a string with a unit, `"5 mm"`). The units
+`object.path.splitIntoGrid` and `text.setStyle` `size`/`leading` also take a string with a unit, `"5 mm"`). A length
+string takes the same arithmetic as the desktop app's fields, where `%` is a share of the value before it:
+`"200mm*50%"` is 100 mm and `"50pt+25%"` is 62.5 pt. The units
 only change what the UI shows and how it reads typed numbers. Preferences ▸ Units has
 three: General (rulers, positions and sizes, the Info panel, dialog distances, canvas measurement labels), Stroke
 (weights, dashes) and Type (font size, leading, baseline shift). General is the active document's units
@@ -2186,7 +2236,15 @@ ISO 8601 UTC. Pass any of the editable keys to change them in one undo step (`nu
 list or a comma-separated string and keeps each word once); bad values are refused. PDF export writes the title,
 author, description and keywords to the document info and XMP, PNG export writes them (with the copyright and
 creation date) as text chunks, and SVG export writes the description as `<desc>` and, with the `metadata` option,
-all of it as Dublin Core. `file.new {created}` and a save to a file (`document.save` or `file.saveAs` with
+all of it as Dublin Core. A PDF, `.ai` or `.ait` opened from its pages or its editing copy (`document.open`,
+`file.newFromTemplate`, `file.revert`; not one restored from the document it carries) opens with the `author`,
+`description`, `keywords`, `copyrightStatus`, `copyrightNotice`, `copyrightUrl`, `created` and `modified` that its XMP
+packet (`dc:creator`, `dc:description`, `dc:subject` or `pdf:Keywords`, `xmpRights:Marked`, `dc:rights`,
+`xmpRights:WebStatement`, `xmp:CreateDate`, `xmp:ModifyDate`) and its document information dictionary (`Author`,
+`Subject`, `Keywords`, `CreationDate`, `ModDate`) give, the XMP packet's value where both give one. A value that
+`file.info` would refuse is left out, and the title is set as for any other open (the file name, or a new untitled
+name for a template).
+`file.new {created}` and a save to a file (`document.save` or `file.saveAs` with
 `{path, modified}`) use the given date (Unix seconds, or `null` for none) instead of now. Their journal entries always
 record the date they used, so replaying the journal makes the same document whenever it runs (an action recorded in
 the Actions panel leaves the date out: playing it later dates the document then). As a step of `command.batch`, a
@@ -2216,6 +2274,22 @@ fills or strokes carry effects is written as one piece per fill and stroke, so o
 
 ```json
 {"name":"run_command","arguments":{"command":"document.rasterEffectsSettings","params":{"resolution":"high","background":"white","addAround":36}}}
+```
+
+## Glass textures
+
+Glass (`distort.glass`) takes an image file as its surface in `params.textureImage`, as `{path}` or
+`{name?, dataBase64}`: a PNG, JPEG, GIF, WebP, TIFF, BMP, PSD or PSB file, decoded within the pixel allowance the
+renderer draws images in, counted as RGBA. `effect.apply` and `effect.setParams` store the image's gray levels in the effect as a grayscale PNG
+in base64 and set `texture: "loaded"` unless the params give a `texture`. `effect.list` reports the stored string,
+and a command given that string stores it unchanged. Any other string, a file that is not an image, or an image past
+the allowance is an error. A save keeps the texture with the effect. Glass lays the texture one image pixel per point
+at Scaling 100%, centered on the object's center and repeated in both directions. Each pixel's luma is the surface's
+height, from 0 for black to 1 pt for white. A transparent pixel counts as middle gray, and a partly transparent pixel
+is mixed with middle gray by its alpha.
+
+```json
+{"name":"run_command","arguments":{"command":"effect.apply","params":{"effect":"distort.glass","params":{"distortion":10,"textureImage":{"path":"/tmp/texture.png"}}}}}
 ```
 
 ## Linked images
@@ -2692,13 +2766,14 @@ defaults); presets and remembered settings are preferences.
 
 ## Asset Export
 
-Assets are pieces of art collected for export on their own (Window › Asset Export, Object › Collect for Export, File ›
-Export Selection…).
+Assets are pieces of art collected for export on their own (Window › Asset Export, Object › Collect for Export, the
+Layers panel ≡ menu and row menu, File › Export Selection…).
 `assets.add {ids?, multiple?}` collects the selected objects (or `ids`): one asset per object, or with
-`multiple: false` one asset of them all, named after the object or `Asset 1`, `Asset 2`…; art already collected keeps
-its asset. Assets name their objects, so they follow edits: moving the art moves the crop, and deleting it
-removes it from its asset (an asset left with nothing goes). `assets.list` gives each asset's id, name, objects and
-crop (`bounds`); `assets.rename {asset, name}` and `assets.remove {assets}` are undo steps.
+`multiple: false` one asset of them all, named after the object or `Asset 1`, `Asset 2`…; a layer id collects the art
+under it (sublayers included). Art already collected keeps its asset. Assets name their objects, so they follow edits:
+moving the art moves the crop, and deleting it removes it from its asset (an asset left with nothing goes).
+`assets.list` gives each asset's id, name, objects and crop (`bounds`); `assets.rename {asset, name}` and
+`assets.remove {assets}` are undo steps.
 
 `assets.export {assets?, folder?, zip?}` writes each asset's art alone, cropped to it and named after it, in every
 format row of the document's export settings, the ones Export for Screens remembers (`document.exportSettings`); any
@@ -2709,9 +2784,12 @@ renderer measures for what the art draws, its effects included.
 
 ```json
 {"name":"run_command","arguments":{"command":"assets.add","params":{"multiple":true}}}
+{"name":"run_command","arguments":{"command":"assets.add","params":{"ids":[12],"multiple":true}}}
 {"name":"run_command","arguments":{"command":"assets.settings.set","params":{"formats":[{"format":"png","scale":"1x"},{"format":"png","scale":"2x"},{"format":"svg"}]}}}
 {"name":"run_command","arguments":{"command":"assets.export","params":{"zip":true}}}
 ```
+A layer id in `ids` (12 above) is the same as Collect for Export on that Layers row: every object under the layer
+becomes an asset (or one asset with `multiple: false`).
 
 ## CSS Properties
 
@@ -3199,7 +3277,8 @@ lists every family available, the installed ones included, each by its English (
 Names in English (`fontNamesInEnglish`) only changes the UI menu labels, not this list. With `family` it gives that
 family's styles (upright by weight, then italics) and fails when the family isn't available. `text.rescanFonts`
 (Character panel menu › Refresh Font List) scans the font folders again, for fonts installed or removed since the app
-started: type set in a font that became available redraws in it, without editing the document. The app does so by
+started: type set in a font that became available redraws in it, and type set in a family that was removed redraws in
+the fallback font and is listed as missing, without editing the document. The app does so by
 itself when its window comes to the front and a font folder changed meanwhile.
 
 ```json

@@ -1608,6 +1608,8 @@
 	Internet Standard RGB (sRGB)	RGB chuẩn Internet (sRGB)
 	Interpolation	Nội suy
 	Intersect	Giao nhau
+	Intertwine	Đan xen
+	Arrange Intertwine Area	Sắp xếp vùng đan xen
 	Inverse	Đảo ngược
 	Invert	Đảo ngược
 	Invert Colors	Đảo màu
@@ -1799,6 +1801,8 @@
 	Load Profile…	Tải hồ sơ…
 	Load SVG into Clipboard	Tải SVG vào bảng tạm
 	Load Text into Clipboard	Tải văn bản vào bảng tạm
+	Load Texture…	Tải kết cấu…
+	Loaded Texture	Kết cấu đã tải
 	Local Libraries	Thư viện cục bộ
 	Locate Object	Xác định vị trí đối tượng
 	Location	Vị trí
@@ -3335,6 +3339,7 @@
 	Text Wrap Options	Tùy chọn bao văn bản
 	Text Wrap Options…	Tùy chọn bao văn bản…
 	Texture	Kết cấu
+	Texture Image	Ảnh kết cấu
 	Texturizer	Texturizer
 	Texturizer…	Texturizer…
 	Thai	Tiếng Thái
@@ -4182,6 +4187,7 @@ theme	Appearance	Giao diện
 @msg	select a linked image: an embedded one has no file	hãy chọn ảnh liên kết: ảnh nhúng không có tệp
 @msg	select a Live Paint group	hãy chọn nhóm tô trực tiếp
 @msg	select a repeat	hãy chọn một đối tượng lặp
+@msg	select an Intertwine group	hãy chọn một nhóm đan xen
 @msg	select a stroke with a variable width	hãy chọn nét có chiều rộng biến đổi
 @msg	select a symbol instance	hãy chọn đối tượng ký hiệu
 @msg	select an envelope	hãy chọn một Envelope
@@ -4252,9 +4258,12 @@ theme	Appearance	Giao diện
 @msg	the file's preview header points outside the file	tiêu đề xem trước của tệp trỏ ra ngoài tệp
 @msg	the files come to more than 1 GB: add fewer at a time	các tệp tổng cộng hơn 1 GB: thêm ít hơn mỗi lần
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Bộ xử lý đồ họa thử trước không hiển thị được cửa sổ, VectorCraft đã khởi động lại trên {summary}
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Lần khởi động trước của VectorCraft đã dừng trên {name} trước khi cửa sổ xuất hiện, nên VectorCraft đã khởi động trên {summary}. Để thử lại bộ xử lý đồ họa đó, hãy đổi Tùy chọn › Hiệu suất › Bộ xử lý đồ họa hoặc khởi động với biến WGPU_BACKEND được đặt
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Lần khởi động trước của VectorCraft đã dừng khi đang liệt kê các bộ xử lý đồ họa, nên VectorCraft đã khởi động trên {summary} chỉ với OpenGL. Để thử lại các giao diện đồ họa khác, hãy đổi Tùy chọn › Hiệu suất › Bộ xử lý đồ họa hoặc khởi động với biến WGPU_BACKEND được đặt
 @msg	The graphics were lost and couldn't be restarted.	Đồ họa đã mất và không thể khởi động lại.
 @msg	The graphics were lost and have been restarted	Đồ họa đã mất và đã được khởi động lại
 @msg	the guide is on a hidden or locked layer	đường căn nằm trên lớp ẩn hoặc bị khóa
+@msg	the image can't be read as a texture	không thể đọc ảnh làm kết cấu
 @msg	the image is {width} × {height} pixels, more than Image Trace takes ({max} megapixels)	ảnh có kích thước {width} × {height} pixel, vượt quá giới hạn vector hóa ảnh ({max} megapixel)
 @msg	the image's pixels don't match its size	pixel ảnh không khớp với kích thước
 @msg	the layer has no objects to clip by	lớp không có đối tượng để cắt
@@ -4429,6 +4438,7 @@ theme	Appearance	Giao diện
 @msg	the FreeHand file claims more entries than can be read	tệp FreeHand khai báo nhiều mục hơn mức có thể đọc
 @msg	the FreeHand file has a record whose size is not known	tệp FreeHand có một bản ghi chưa rõ kích thước
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	phiên bản FreeHand {n} không được hỗ trợ: VectorCraft mở FreeHand 8 đến MX (11); hãy mở trong FreeHand mới hơn rồi lưu, hoặc xuất thành EPS, PDF hoặc AI
+	Registration:	Điểm đăng ký:
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Kích thước
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Bản vẽ : kích thước thực — 1:10 ghi 1 đơn vị trên trang thành 10.
@@ -4477,3 +4487,23 @@ theme	Appearance	Giao diện
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Đóng các đầu tròn của biên dạng mở. Khi xoay một phần, các mặt cắt bên vẫn mở.
 	Distance	Khoảng cách
+@msg	span must be "object" or "selection", got {v}	span phải là "object" hoặc "selection", không phải {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" đặt một `gradient`, không phải mẫu màu
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" đặt một dải chuyển màu: hãy cung cấp `gradient`
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" đặt dải chuyển màu tuyến tính hoặc xuyên tâm, không phải dạng tự do
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" tự đặt dải chuyển màu: hãy bỏ `start` và `end` (chúng đã đặt nó theo tọa độ tài liệu)
+	Make Image Dynamic	Tạo hình ảnh động
+	Import Data Sets…	Nhập tập dữ liệu…
+	Export Data Sets…	Xuất tập dữ liệu…
+	Make Graph Dynamic	Tạo biểu đồ động
+	Batch…	Hàng loạt…
+	Source Folder:	Thư mục nguồn:
+	Destination Folder:	Thư mục đích:
+	Overrides	Ghi đè
+	Uses every data set of the open document.	Dùng mọi tập dữ liệu của tài liệu đang mở.
+@msg	Batch: {count} processed	Hàng loạt: đã xử lý {count}
+@msg	Batch: {count} processed, {failed} failed	Hàng loạt: đã xử lý {count}, lỗi {failed}
+@msg	choose a destination folder	hãy chọn thư mục đích
+@msg	choose a source folder	hãy chọn thư mục nguồn
+@msg	open a document with data sets	hãy mở một tài liệu có tập dữ liệu
+@msg	the action has no steps	hành động không có bước nào

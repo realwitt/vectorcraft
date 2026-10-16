@@ -426,6 +426,8 @@
 	Pathfinder	パスファインダー
 	Add	追加
 	Intersect	交差
+	Intertwine	織り交ぜ
+	Arrange Intertwine Area	織り交ぜ領域の重ね順
 	Exclude	中マド
 	Subtract	前面オブジェクトで型抜き
 	Minus Back	背面オブジェクトで型抜き
@@ -3534,6 +3536,52 @@ theme	Appearance	外観
 # names and values in backticks or code (`colorModel rgb`, `document.export`) stay as they are.
 # Japanese: no final 。 (these are status lines, and reasons that follow a colon), unless the English ends
 # with a period; a space between Japanese text and an adjacent Latin word, number or {placeholder}.
+# Swatches panel: the default swatches' names (shown in the UI language; documents keep them)
+swatch	[None]	[なし]
+swatch	[Registration]	[レジストレーション]
+swatch	White	ホワイト
+swatch	Black	ブラック
+swatch	Red	レッド
+swatch	Orange Red	オレンジレッド
+swatch	Orange	オレンジ
+swatch	Amber	アンバー
+swatch	Yellow	イエロー
+swatch	Yellow Green	イエローグリーン
+swatch	Lime	ライム
+swatch	Green	グリーン
+swatch	Emerald	エメラルド
+swatch	Teal	ティール
+swatch	Aqua	アクア
+swatch	Cyan Green	シアングリーン
+swatch	Cyan	シアン
+swatch	Azure	アジュール
+swatch	Blue	ブルー
+swatch	Indigo	インディゴ
+swatch	Violet	バイオレット
+swatch	Purple	パープル
+swatch	Magenta	マゼンタ
+swatch	Rose	ローズ
+swatch	Pink	ピンク
+swatch	Brown	ブラウン
+swatch	Tan	タン
+swatch	Coffee	コーヒー
+swatch	Chocolate	チョコレート
+swatch	Sand	サンド
+swatch	Copper	カッパー
+swatch	Rust	ラスト
+swatch	Walnut	ウォルナット
+swatch	Espresso	エスプレッソ
+swatch	White, Black	ホワイト、ブラック
+swatch	Radial White, Black	円形 ホワイト、ブラック
+swatch	Sunset	サンセット
+swatch	Ocean	オーシャン
+swatch	Grays	グレー
+swatch	Brights	ビビッド
+swatch	Bright Red	ビビッドレッド
+swatch	Bright Yellow	ビビッドイエロー
+swatch	Bright Green	ビビッドグリーン
+swatch	Bright Blue	ビビッドブルー
+swatch	Bright Violet	ビビッドバイオレット
 @msg	Reset {_1}	{_1} をリセットしました
 @msg	Saving	保存中
 @msg	Saving {_1}	{_1} を保存中
@@ -3553,6 +3601,8 @@ theme	Appearance	外観
 @msg	VectorCraft failed to start: {e}	VectorCraft を起動できませんでした: {e}
 @msg	Your unsaved changes are kept in this browser: reload the page to get them back.	未保存の変更はこのブラウザーに残っています: 復元するにはページを再読み込みしてください。
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	最初に試したグラフィックスプロセッサーではウィンドウを表示できなかったため、{summary} で VectorCraft を再起動しました
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	前回の VectorCraft の起動はウィンドウが表示される前に {name} で終了したため、{summary} で起動しました。このグラフィックプロセッサーをもう一度試すには、「環境設定 › パフォーマンス › グラフィックプロセッサー」を変更するか、WGPU_BACKEND を設定して起動してください
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	前回の VectorCraft の起動はグラフィックプロセッサーの一覧を取得している間に終了したため、OpenGL のみを使って {summary} で起動しました。ほかのグラフィックバックエンドをもう一度試すには、「環境設定 › パフォーマンス › グラフィックプロセッサー」を変更するか、WGPU_BACKEND を設定して起動してください
 @msg	not a DXF drawing	DXF 図面ではありません
 @msg	scale must be a number from {_1} to {_2}, not {s}	縮尺は {_1} から {_2} までの数値にしてください ({s} は指定できません)
 @msg	the artboard to fit must be a positive size up to {_1} pt	合わせる先のアートボードのサイズは 0 より大きく {_1} pt 以下にしてください
@@ -3750,6 +3800,7 @@ theme	Appearance	外観
 @msg	not in pattern editing mode	パターン編集モードではありません
 @msg	pattern missing	パターンが見つかりません
 @msg	select a repeat	リピートを選択してください
+@msg	select an Intertwine group	織り交ぜグループを選択してください
 @msg	select the art to repeat	リピートするアートを選択してください
 @msg	the document has no patterns	ドキュメントにパターンがありません
 @msg	no artboard	アートボードがありません
@@ -4246,6 +4297,9 @@ effect	Vertical	垂直
 	Blocks	ブロック
 	Frosted	すりガラス
 	Tiny Lens	小さなレンズ
+	Loaded Texture	読み込んだテクスチャ
+	Load Texture…	テクスチャを読み込み…
+	Texture Image	テクスチャ画像
 	Rename Data Set	データセットの名前を変更
 	Variable Options	変数のオプション
 	Edit Data Set	データセットを編集
@@ -4400,6 +4454,7 @@ lighting	Light	ライト
 @msg	unknown parameter `{key}`; the command takes: {keys}	`{key}` は不明なパラメーターです。このコマンドで使えるパラメーター: {keys}
 	Load EPS into Clipboard	EPS をクリップボードに読み込む
 @msg	an image of {w} × {h} pixels is too large to draw	{w} × {h} ピクセルの画像は大きすぎて描画できません
+@msg	the image can't be read as a texture	この画像はテクスチャとして読み込めません
 	Basic	基本
 	Fill and Stroke Controls	塗りと線のコントロール
 	Coloring Controls	カラーのコントロール
@@ -4441,6 +4496,7 @@ lighting	Light	ライト
 @msg	the FreeHand file claims more entries than can be read	FreeHand ファイルが読み取れる数を超える項目を宣言しています
 @msg	the FreeHand file has a record whose size is not known	FreeHand ファイルに、大きさが不明なレコードがあります
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	未対応の FreeHand バージョン {n} です: VectorCraft が開けるのは FreeHand 8 から MX (11) までです。より新しい FreeHand で開いて保存するか、EPS、PDF または AI として書き出してください
+	Registration:	基準点:
 # Dimension tool (linked dimension annotations)
 	Create Dimension	寸法を作成
 	Dimension Tool	寸法ツール
@@ -4450,7 +4506,6 @@ lighting	Light	ライト
 	Precision:	精度:
 	Update Dimensions	寸法を更新
 	Display	表示
-
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	寸法
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	図面 : 実寸 — 1:10 では、ページ上の 1 単位を 10 と表示します。
@@ -4493,3 +4548,23 @@ lighting	Light	ライト
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	開いたプロファイルの円形の端を閉じます。部分的な回転では切断面は開いたままです。
 	Distance	距離
+@msg	span must be "object" or "selection", got {v}	span は "object" または "selection" で指定してください ({v} は指定できません)
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" は `gradient` を配置します。スウォッチは配置できません
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" はグラデーションを配置します: `gradient` を指定してください
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" は線形または円形グラデーションを配置します。フリーグラデーションは配置できません
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" はグラデーション自体を配置します: `start` と `end` は省略してください (これらはすでにドキュメント座標で配置を指定します)
+	Make Image Dynamic	画像を動的にする
+	Import Data Sets…	データセットを読み込み…
+	Export Data Sets…	データセットを書き出し…
+	Make Graph Dynamic	グラフを動的にする
+	Batch…	バッチ…
+	Source Folder:	ソースフォルダー:
+	Destination Folder:	出力先フォルダー:
+	Overrides	上書き
+	Uses every data set of the open document.	開いているドキュメントのすべてのデータセットを使用します。
+@msg	Batch: {count} processed	バッチ: {count} 件を処理しました
+@msg	Batch: {count} processed, {failed} failed	バッチ: {count} 件を処理、{failed} 件が失敗しました
+@msg	choose a destination folder	出力先フォルダーを選択してください
+@msg	choose a source folder	ソースフォルダーを選択してください
+@msg	open a document with data sets	データセットのあるドキュメントを開いてください
+@msg	the action has no steps	アクションにステップがありません

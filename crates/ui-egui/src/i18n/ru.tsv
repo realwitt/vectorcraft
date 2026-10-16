@@ -1373,6 +1373,8 @@
 	Internal CSS	Внутренний CSS
 	Internet Standard RGB (sRGB)	Стандартный интернет-RGB (sRGB)
 	Intersect	Пересечение
+	Intertwine	Переплетение
+	Arrange Intertwine Area	Упорядочить область переплетения
 	Inverse	Обратный
 	Invert	Инвертировать
 	Invert Colors	Инвертировать цвета
@@ -3901,6 +3903,7 @@ axis	Both	Оба
 @msg	select a gradient mesh	выделите градиентную сетку
 @msg	select a linked image: an embedded one has no file	выделите связанное изображение: у внедрённого нет файла
 @msg	select a repeat	выделите повтор
+@msg	select an Intertwine group	выделите группу переплетения
 @msg	select a stroke with a variable width	выделите обводку с переменной шириной
 @msg	select a symbol instance	выделите экземпляр символа
 @msg	select an Image Trace object	выделите объект трассировки изображения
@@ -4068,6 +4071,8 @@ axis	Both	Оба
 @msg	{_1} files	{_1} файлов
 @msg	The graphics were lost and have been restarted	Графика была потеряна и перезапущена
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Графический процессор, выбранный первым, не смог показать окно, поэтому VectorCraft запустился снова на {summary}
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Прошлый запуск VectorCraft завершился на {name} до появления окна, поэтому VectorCraft запустился на {summary}. Чтобы снова попробовать этот графический процессор, измените Настройки › Производительность › Графический процессор или запустите приложение с заданной переменной WGPU_BACKEND
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Прошлый запуск VectorCraft завершился во время перечисления графических процессоров, поэтому VectorCraft запустился на {summary} только с OpenGL. Чтобы снова попробовать другие графические интерфейсы, измените Настройки › Производительность › Графический процессор или запустите приложение с заданной переменной WGPU_BACKEND
 @msg	Loading VectorCraft…	Загрузка VectorCraft…
 @msg	VectorCraft failed to start: {e}	VectorCraft не удалось запустить: {e}
 @msg	A browser with WebGPU or WebGL2 is required.	Требуется браузер с WebGPU или WebGL2.
@@ -4248,6 +4253,9 @@ axis	Both	Оба
 	Blocks	Блоки
 	Frosted	Матовое
 	Tiny Lens	Мелкие линзы
+	Loaded Texture	Загруженная текстура
+	Load Texture…	Загрузить текстуру…
+	Texture Image	Изображение текстуры
 	Rename Data Set	Переименовать набор данных
 	Rename Variable	Переименовать переменную
 	Variable Options	Параметры переменной
@@ -4402,6 +4410,7 @@ lighting	Light	Свет
 @msg	unknown parameter `{key}`; the command takes: {keys}	неизвестный параметр `{key}`; команда принимает: {keys}
 	Load EPS into Clipboard	Загрузить EPS в буфер обмена
 @msg	an image of {w} × {h} pixels is too large to draw	изображение размером {w} × {h} пикселей слишком велико для отрисовки
+@msg	the image can't be read as a texture	изображение не удаётся прочитать как текстуру
 	Basic	Базовый
 	Fill and Stroke Controls	Элементы управления заливкой и обводкой
 	Coloring Controls	Элементы управления цветом
@@ -4444,6 +4453,7 @@ lighting	Light	Свет
 @msg	the FreeHand file has a record whose size is not known	в файле FreeHand есть запись, размер которой неизвестен
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	неподдерживаемая версия FreeHand {n}: VectorCraft открывает FreeHand с 8 по MX (11); откройте файл в более новой версии FreeHand и сохраните его либо экспортируйте как EPS, PDF или AI
 
+	Registration:	Регистрация:
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Размер
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Чертёж : реальный размер — при 1:10 1 единица на странице подписывается как 10.
@@ -4494,3 +4504,23 @@ lighting	Light	Свет
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Закрывает круглые торцы открытых профилей. При неполном вращении боковые срезы остаются открытыми.
 	Distance	Расстояние
+@msg	span must be "object" or "selection", got {v}	span должен быть "object" или "selection", а не {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" размещает `gradient`, а не образец
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" размещает градиент: укажите `gradient`
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" размещает линейный или радиальный градиент, а не произвольный
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" сам размещает градиент: уберите `start` и `end` (они уже задают его в координатах документа)
+	Make Image Dynamic	Сделать изображение динамическим
+	Import Data Sets…	Импортировать наборы данных…
+	Export Data Sets…	Экспортировать наборы данных…
+	Make Graph Dynamic	Сделать диаграмму динамической
+	Batch…	Пакетная обработка…
+	Source Folder:	Исходная папка:
+	Destination Folder:	Папка назначения:
+	Overrides	Переопределения
+	Uses every data set of the open document.	Использует каждый набор данных открытого документа.
+@msg	Batch: {count} processed	Пакетная обработка: обработано {count}
+@msg	Batch: {count} processed, {failed} failed	Пакетная обработка: обработано {count}, с ошибкой {failed}
+@msg	choose a destination folder	выберите папку назначения
+@msg	choose a source folder	выберите исходную папку
+@msg	open a document with data sets	откройте документ с наборами данных
+@msg	the action has no steps	в действии нет шагов

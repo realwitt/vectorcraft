@@ -1375,6 +1375,8 @@
 	Internal CSS	CSS interno
 	Internet Standard RGB (sRGB)	RGB standard Internet (sRGB)
 	Intersect	Intersezione
+	Intertwine	Intreccia
+	Arrange Intertwine Area	Disponi area intrecciata
 	Inverse	Inversa
 	Invert	Inverti
 	Invert Colors	Inverti colori
@@ -3905,6 +3907,7 @@ axis	Both	Entrambi
 @msg	select a gradient mesh	seleziona una trama sfumatura
 @msg	select a linked image: an embedded one has no file	seleziona un'immagine collegata: un'immagine incorporata non ha un file
 @msg	select a repeat	seleziona una ripetizione
+@msg	select an Intertwine group	seleziona un gruppo intrecciato
 @msg	select a stroke with a variable width	seleziona una traccia con larghezza variabile
 @msg	select a symbol instance	seleziona un'istanza di simbolo
 @msg	select an Image Trace object	seleziona un oggetto di ricalco immagine
@@ -4072,6 +4075,8 @@ axis	Both	Entrambi
 @msg	{_1} files	{_1} file
 @msg	The graphics were lost and have been restarted	Il contesto grafico è stato perso ed è stato riavviato
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Il processore grafico provato per primo non è riuscito a mostrare la finestra, quindi VectorCraft è stato riavviato con {summary}
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	L'ultimo avvio di VectorCraft si è interrotto su {name} prima che comparisse la finestra, quindi VectorCraft è stato avviato con {summary}. Per riprovare quel processore grafico, cambia Preferenze › Prestazioni › Processore grafico o avvia con la variabile WGPU_BACKEND impostata
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	L'ultimo avvio di VectorCraft si è interrotto mentre elencava i processori grafici, quindi VectorCraft è stato avviato con {summary} usando solo OpenGL. Per riprovare le altre interfacce grafiche, cambia Preferenze › Prestazioni › Processore grafico o avvia con la variabile WGPU_BACKEND impostata
 @msg	Loading VectorCraft…	Caricamento di VectorCraft…
 @msg	VectorCraft failed to start: {e}	Impossibile avviare VectorCraft: {e}
 @msg	A browser with WebGPU or WebGL2 is required.	È necessario un browser con WebGPU o WebGL2.
@@ -4252,6 +4257,9 @@ effect	Regular	Normale
 	Blocks	Blocchi
 	Frosted	Smerigliato
 	Tiny Lens	Lente piccola
+	Loaded Texture	Texture caricata
+	Load Texture…	Carica texture…
+	Texture Image	Immagine texture
 	Rename Data Set	Rinomina set di dati
 	Rename Variable	Rinomina variabile
 	Variable Options	Opzioni variabile
@@ -4406,6 +4414,7 @@ lighting	Light	Luce
 @msg	unknown parameter `{key}`; the command takes: {keys}	parametro sconosciuto `{key}`; il comando accetta: {keys}
 	Load EPS into Clipboard	Carica EPS negli appunti
 @msg	an image of {w} × {h} pixels is too large to draw	un'immagine di {w} × {h} pixel è troppo grande per essere disegnata
+@msg	the image can't be read as a texture	l'immagine non può essere letta come texture
 	Basic	Base
 	Fill and Stroke Controls	Controlli di riempimento e traccia
 	Coloring Controls	Controlli colore
@@ -4448,6 +4457,7 @@ lighting	Light	Luce
 @msg	the FreeHand file has a record whose size is not known	il file FreeHand ha un record di cui non si conosce la dimensione
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	versione FreeHand {n} non supportata: VectorCraft apre FreeHand 8 fino a MX (11); aprilo in un FreeHand più recente e salva, oppure esportalo come EPS, PDF o AI
 
+	Registration:	Registrazione:
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Quota
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Disegno : dimensione reale — 1:10 indica 1 unità sulla pagina come 10.
@@ -4498,3 +4508,23 @@ lighting	Light	Luce
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Chiude le estremità circolari dei profili aperti. Le rotazioni parziali mantengono aperti i lati di taglio.
 	Distance	Distanza
+@msg	span must be "object" or "selection", got {v}	span deve essere "object" o "selection", non {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" posiziona un `gradient`, non un campione
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" posiziona una sfumatura: indica `gradient`
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" posiziona una sfumatura lineare o radiale, non una sfumatura a forma libera
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" posiziona la sfumatura stessa: ometti `start` e `end` (la posizionano già in coordinate del documento)
+	Make Image Dynamic	Rendi immagine dinamica
+	Import Data Sets…	Importa set di dati…
+	Export Data Sets…	Esporta set di dati…
+	Make Graph Dynamic	Rendi grafico dinamico
+	Batch…	Elaborazione batch…
+	Source Folder:	Cartella di origine:
+	Destination Folder:	Cartella di destinazione:
+	Overrides	Sostituzioni
+	Uses every data set of the open document.	Usa ogni set di dati del documento aperto.
+@msg	Batch: {count} processed	Elaborazione batch: {count} elaborati
+@msg	Batch: {count} processed, {failed} failed	Elaborazione batch: {count} elaborati, {failed} non riusciti
+@msg	choose a destination folder	scegli una cartella di destinazione
+@msg	choose a source folder	scegli una cartella di origine
+@msg	open a document with data sets	apri un documento con set di dati
+@msg	the action has no steps	l'azione non ha passaggi

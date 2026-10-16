@@ -1374,6 +1374,8 @@
 	Internal CSS	CSS interne
 	Internet Standard RGB (sRGB)	RVB standard Internet (sRGB)
 	Intersect	Intersection
+	Intertwine	Entrelacer
+	Arrange Intertwine Area	Disposer la zone entrelacée
 	Inverse	Inverser la sélection
 	Invert	Inverser
 	Invert Colors	Inverser les couleurs
@@ -3899,6 +3901,7 @@ axis	Both	Les deux
 @msg	select a gradient mesh	sélectionnez un filet de dégradé
 @msg	select a linked image: an embedded one has no file	sélectionnez une image liée : une image incorporée n’a pas de fichier
 @msg	select a repeat	sélectionnez une répétition
+@msg	select an Intertwine group	sélectionnez un groupe entrelacé
 @msg	select a stroke with a variable width	sélectionnez un contour de largeur variable
 @msg	select a symbol instance	sélectionnez une instance de symbole
 @msg	select an Image Trace object	sélectionnez un objet de vectorisation de l’image
@@ -4066,6 +4069,8 @@ axis	Both	Les deux
 @msg	{_1} files	Fichiers {_1}
 @msg	The graphics were lost and have been restarted	Le contexte graphique a été perdu puis redémarré
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Le processeur graphique essayé en premier n’a pas pu afficher la fenêtre : VectorCraft a redémarré sur {summary}
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Le dernier démarrage de VectorCraft s’est arrêté sur {name} avant l’affichage de la fenêtre, donc VectorCraft a démarré sur {summary}. Pour réessayer ce processeur graphique, modifiez Préférences › Performances › Processeur graphique ou démarrez avec la variable WGPU_BACKEND définie
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Le dernier démarrage de VectorCraft s’est arrêté pendant l’énumération des processeurs graphiques, donc VectorCraft a démarré sur {summary} avec OpenGL seul. Pour réessayer les autres interfaces graphiques, modifiez Préférences › Performances › Processeur graphique ou démarrez avec la variable WGPU_BACKEND définie
 @msg	Loading VectorCraft…	Chargement de VectorCraft…
 @msg	VectorCraft failed to start: {e}	Le démarrage de VectorCraft a échoué : {e}
 @msg	A browser with WebGPU or WebGL2 is required.	Un navigateur prenant en charge WebGPU ou WebGL2 est nécessaire.
@@ -4259,6 +4264,9 @@ effect	Soft	Doux
 	Blocks	Blocs
 	Frosted	Dépoli
 	Tiny Lens	Petites lentilles
+	Loaded Texture	Texture chargée
+	Load Texture…	Charger une texture…
+	Texture Image	Image de texture
 	Rename Data Set	Renommer le jeu de données
 	Rename Variable	Renommer la variable
 	Variable Options	Options de variable
@@ -4834,6 +4842,7 @@ mark-style	Japanese	Japonais
 theme	Appearance	Apparence
 	Load EPS into Clipboard	Charger un EPS dans le presse-papiers
 @msg	an image of {w} × {h} pixels is too large to draw	une image de {w} × {h} pixels est trop grande pour être dessinée
+@msg	the image can't be read as a texture	l'image ne peut pas être lue comme texture
 	Fill and Stroke Controls	Commandes de fond et de contour
 	Coloring Controls	Commandes de couleur
 	Draw Mode Controls	Commandes de mode de dessin
@@ -4875,6 +4884,7 @@ theme	Appearance	Apparence
 @msg	the FreeHand file has a record whose size is not known	le fichier FreeHand contient un enregistrement dont la taille est inconnue
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	version FreeHand {n} non prise en charge : VectorCraft ouvre FreeHand 8 à MX (11) ; ouvrez-le dans un FreeHand plus récent et enregistrez, ou exportez-le en EPS, PDF ou AI
 
+	Registration:	Repère d'alignement :
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Cote
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Dessin : taille réelle — 1:10 étiquette 1 unité de la page comme 10.
@@ -4921,3 +4931,23 @@ theme	Appearance	Apparence
 @msg	Unknown unit	Unité inconnue
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Ferme les extrémités circulaires des profils ouverts. Les rotations partielles conservent leurs faces de coupe ouvertes.
+@msg	span must be "object" or "selection", got {v}	span doit être "object" ou "selection", pas {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" place un `gradient`, pas une nuance
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" place un dégradé : indiquez `gradient`
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" place un dégradé linéaire ou radial, pas un dégradé de forme libre
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" place le dégradé lui-même : omettez `start` et `end` (ils le placent déjà en coordonnées du document)
+	Make Image Dynamic	Rendre l'image dynamique
+	Import Data Sets…	Importer des jeux de données…
+	Export Data Sets…	Exporter des jeux de données…
+	Make Graph Dynamic	Rendre le graphe dynamique
+	Batch…	Traitement par lots…
+	Source Folder:	Dossier source :
+	Destination Folder:	Dossier de destination :
+	Overrides	Remplacements
+	Uses every data set of the open document.	Utilise chaque jeu de données du document ouvert.
+@msg	Batch: {count} processed	Traitement par lots : {count} traités
+@msg	Batch: {count} processed, {failed} failed	Traitement par lots : {count} traités, {failed} en échec
+@msg	choose a destination folder	choisissez un dossier de destination
+@msg	choose a source folder	choisissez un dossier source
+@msg	open a document with data sets	ouvrez un document avec des jeux de données
+@msg	the action has no steps	l'action n'a aucune étape

@@ -425,6 +425,8 @@
 	Add	Přidat
 @id	pathfinder.add	Sjednotit
 	Intersect	Protnout
+	Intertwine	Proplést
+	Arrange Intertwine Area	Uspořádat oblast propletení
 	Exclude	Vyloučit
 	Subtract	Odečíst
 	Minus Back	Odečíst zadní
@@ -2742,6 +2744,9 @@ effect	Soft	Měkký
 	Blocks	Bloky
 	Frosted	Matné sklo
 	Tiny Lens	Drobné čočky
+	Loaded Texture	Načtená textura
+	Load Texture…	Načíst texturu…
+	Texture Image	Obraz textury
 	Right Diagonal	Pravá diagonála
 	Left Diagonal	Levá diagonála
 effect	Horizontal	Vodorovný
@@ -4197,6 +4202,7 @@ imageTrace	Outline	Obrys
 @msg	select a gradient mesh	vyberte přechodovou síť
 @msg	select a linked image: an embedded one has no file	vyberte propojený obrázek: vložený nemá soubor
 @msg	select a repeat	vyberte opakování
+@msg	select an Intertwine group	vyberte skupinu propletení
 @msg	select a stroke with a variable width	vyberte tah s proměnnou šířkou
 @msg	select a symbol instance	vyberte instanci symbolu
 @msg	select an Image Trace object	vyberte objekt vektorizace obrazu
@@ -4363,6 +4369,8 @@ imageTrace	Outline	Obrys
 @msg	{_1} files	Soubory {_1}
 @msg	The graphics were lost and have been restarted	Grafika byla ztracena a byla restartována
 @msg	The graphics processor tried first couldn't show the window, so VectorCraft started again on {summary}	Grafický procesor zkoušený jako první nedokázal zobrazit okno, proto se VectorCraft znovu spustil na {summary}
+@msg	The last start of VectorCraft ended on {name} before its window appeared, so it started on {summary}. To try that graphics processor again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Poslední spuštění aplikace VectorCraft skončilo na {name} dřív, než se zobrazilo okno, proto se spustila na {summary}. Chcete-li tento grafický procesor zkusit znovu, změňte Předvolby › Výkon › Grafický procesor nebo ji spusťte s nastavenou proměnnou WGPU_BACKEND
+@msg	The last start of VectorCraft ended while it listed the graphics processors, so it started on {summary} with OpenGL alone. To try the other graphics backends again, change Preferences › Performance › Graphics Processor or start with WGPU_BACKEND set	Poslední spuštění aplikace VectorCraft skončilo během zjišťování grafických procesorů, proto se spustila na {summary} jen s OpenGL. Chcete-li znovu zkusit ostatní grafická rozhraní, změňte Předvolby › Výkon › Grafický procesor nebo ji spusťte s nastavenou proměnnou WGPU_BACKEND
 @msg	Loading VectorCraft…	Načítání VectorCraftu…
 @msg	VectorCraft failed to start: {e}	VectorCraft se nepodařilo spustit: {e}
 @msg	A browser with WebGPU or WebGL2 is required.	Je potřeba prohlížeč s WebGPU nebo WebGL2.
@@ -4834,6 +4842,7 @@ mark-style	Japanese	Japonské
 @msg	unknown parameter `{key}`; the command takes: {keys}	neznámý parametr `{key}`; příkaz přijímá: {keys}
 	Load EPS into Clipboard	Načíst EPS do schránky
 @msg	an image of {w} × {h} pixels is too large to draw	obraz o velikosti {w} × {h} obrazových bodů je příliš velký na vykreslení
+@msg	the image can't be read as a texture	obraz nelze načíst jako texturu
 	Fill and Stroke Controls	Ovládací prvky výplně a tahu
 	Coloring Controls	Ovládací prvky barev
 	Draw Mode Controls	Ovládací prvky režimu kreslení
@@ -4874,9 +4883,9 @@ mark-style	Japanese	Japonské
 @msg	the FreeHand file claims more entries than can be read	soubor FreeHand uvádí více položek, než lze přečíst
 @msg	the FreeHand file has a record whose size is not known	soubor FreeHand obsahuje záznam, jehož velikost není známa
 @msg	unsupported FreeHand version {n}: VectorCraft opens FreeHand 8 to MX (11); open it in a newer FreeHand and save, or export it as EPS, PDF or AI	nepodporovaná verze FreeHand {n}: VectorCraft otevírá FreeHand 8 až MX (11); otevřete jej v novějším FreeHandu a uložte, nebo jej exportujte jako EPS, PDF nebo AI
+	Registration:	Registrace:
 # Dimension tool (linked dimension annotations)
 	Display	Zobrazení
-
 # Dimension tool and Object › Dimensions (dimension groups, their dialog and messages).
 	Dimension	Rozměr
 	Drawing : real size — 1:10 labels 1 unit on the page as 10.	Výkres : skutečná velikost — 1:10 označí 1 jednotku na stránce jako 10.
@@ -4922,3 +4931,23 @@ mark-style	Japanese	Japonské
 @msg	Unknown unit	Neznámá jednotka
 # Revolve cap description
 	Close the circular ends of open profiles. Partial sweeps keep their cut sides open.	Uzavře kruhové konce otevřených profilů. Boční řezy částečného otočení zůstávají otevřené.
+@msg	span must be "object" or "selection", got {v}	span musí být "object" nebo "selection", ne {v}
+@msg	span: "selection" places a `gradient`, not a swatch	span: "selection" umísťuje `gradient`, ne vzorník
+@msg	span: "selection" places a gradient: give `gradient`	span: "selection" umísťuje přechod: zadejte `gradient`
+@msg	span: "selection" places a linear or radial gradient, not a freeform one	span: "selection" umísťuje lineární nebo radiální přechod, ne volný přechod
+@msg	span: "selection" places the gradient itself: leave out `start` and `end` (they already place it in document coordinates)	span: "selection" umísťuje samotný přechod: vynechte `start` a `end` (ty ho už umísťují v souřadnicích dokumentu)
+	Make Image Dynamic	Nastavit obraz jako dynamický
+	Import Data Sets…	Importovat sady dat…
+	Export Data Sets…	Exportovat sady dat…
+	Make Graph Dynamic	Nastavit graf jako dynamický
+	Batch…	Dávka…
+	Source Folder:	Zdrojová složka:
+	Destination Folder:	Cílová složka:
+	Overrides	Přepsání
+	Uses every data set of the open document.	Použije každou sadu dat otevřeného dokumentu.
+@msg	Batch: {count} processed	Dávka: zpracováno {count}
+@msg	Batch: {count} processed, {failed} failed	Dávka: zpracováno {count}, selhalo {failed}
+@msg	choose a destination folder	vyberte cílovou složku
+@msg	choose a source folder	vyberte zdrojovou složku
+@msg	open a document with data sets	otevřete dokument se sadami dat
+@msg	the action has no steps	akce nemá žádné kroky

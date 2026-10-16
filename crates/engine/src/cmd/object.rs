@@ -11,7 +11,7 @@ use vectorcraft_doc::{Appearance, Document, Knockout, LiveCorners, LiveShape, No
 use vectorcraft_geom::shapes::CornerKind;
 use vectorcraft_geom::{Affine, FillRule, PathData, Point, Rect, Vec2};
 
-use super::edit::{duplicate_in, selected_roots};
+use super::edit::{duplicate_in, outermost, selected_roots};
 use super::opacitymask::percent;
 use super::*;
 use crate::{EngineError, LastTransform};
@@ -32,8 +32,8 @@ pub fn specs() -> Vec<CommandSpec> {
             "Move…",
             ["Object", "Transform"],
             Some("Cmd+Shift+M"),
-            "{dx, dy, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
-            has_selection,
+            "{ids?: [id…] (selected first; default: the selection), dx, dy, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
+            has_selection_or_guides,
             move_cmd
         ),
         cmd!(
@@ -41,7 +41,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Rotate…",
             ["Object", "Transform"],
             None,
-            "{angle: deg (counter-clockwise), absolute?: bool (angle is the bounding box's new angle, not an amount), origin?: [x,y] (default: the bounding box centre), copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)} → {ids}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
+            "{ids?: [id…] (selected first; default: the selection), angle: deg (counter-clockwise), absolute?: bool (angle is the bounding box's new angle, not an amount), origin?: [x,y] (default: the bounding box centre), copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)} → {ids}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
             has_selection,
             rotate
         ),
@@ -50,7 +50,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Scale…",
             ["Object", "Transform"],
             None,
-            "{sx: %, sy?: %, origin?: [x,y], copy?, strokes?: bool (Scale Strokes & Effects: stroke weights, dashes and effect distances scale; off keeps them, type strokes included), corners?: bool (Scale Corners: live corner radii scale), objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)} (strokes/corners default to the preferences). With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
+            "{ids?: [id…] (selected first; default: the selection), sx: %, sy?: %, origin?: [x,y], copy?, strokes?: bool (Scale Strokes & Effects: stroke weights, dashes and effect distances scale; off keeps them, type strokes included), corners?: bool (Scale Corners: live corner radii scale), objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)} (strokes/corners default to the preferences). With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
             has_selection,
             scale
         ),
@@ -59,7 +59,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Reflect…",
             ["Object", "Transform"],
             None,
-            "{axis: \"vertical\"|\"horizontal\"|deg, origin?, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
+            "{ids?: [id…] (selected first; default: the selection), axis: \"vertical\"|\"horizontal\"|deg, origin?, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
             has_selection,
             reflect
         ),
@@ -68,7 +68,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Shear…",
             ["Object", "Transform"],
             None,
-            "{angle: deg, axis?: \"horizontal\"|\"vertical\", origin?, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
+            "{ids?: [id…] (selected first; default: the selection), angle: deg, axis?: \"horizontal\"|\"vertical\", origin?, copy?, objects?: bool (Transform Objects, default true; false: the art stays and, with patterns, only its pattern tiles transform), patterns?: bool (Transform Patterns: pattern fills and strokes transform with the art; default: prefs transformPatternTiles), typeAreas?: bool (area type: the frame is reshaped and the text reflows at its size)}. With anchors selected with Direct Selection (and no copy), only those anchors and their handles transform, about the centre of their own box.",
             has_selection,
             shear
         ),
@@ -90,36 +90,104 @@ pub fn specs() -> Vec<CommandSpec> {
             has_selection_or_guides,
             nudge
         ),
-        cmd!("object.arrange.bringToFront", "Bring to Front", ["Object", "Arrange"], Some("Cmd+Shift+]"), "{}", has_selection, |s, _| arrange(
-            s,
-            Arrange::Front
-        )),
-        cmd!("object.arrange.bringForward", "Bring Forward", ["Object", "Arrange"], Some("Cmd+]"), "{}", has_selection, |s, _| arrange(
-            s,
-            Arrange::Forward
-        )),
-        cmd!("object.arrange.sendBackward", "Send Backward", ["Object", "Arrange"], Some("Cmd+["), "{}", has_selection, |s, _| arrange(
-            s,
-            Arrange::Backward
-        )),
-        cmd!("object.arrange.sendToBack", "Send to Back", ["Object", "Arrange"], Some("Cmd+Shift+["), "{}", has_selection, |s, _| arrange(
-            s,
-            Arrange::Back
-        )),
-        cmd!("object.arrange.sendToCurrentLayer", "Send to Current Layer", ["Object", "Arrange"], None, "{}", has_selection, send_to_current_layer),
-        cmd!("object.group", "Group", ["Object"], Some("Cmd+G"), "{} → {id}", has_selection, group),
-        cmd!("object.ungroup", "Ungroup", ["Object"], Some("Cmd+Shift+G"), "{}", has_selection, ungroup),
-        cmd!("object.lock", "Selection", ["Object", "Lock"], Some("Cmd+2"), "{}", has_selection, lock),
+        cmd!(
+            "object.arrange.bringToFront",
+            "Bring to Front",
+            ["Object", "Arrange"],
+            Some("Cmd+Shift+]"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            |s, _| arrange(s, Arrange::Front)
+        ),
+        cmd!(
+            "object.arrange.bringForward",
+            "Bring Forward",
+            ["Object", "Arrange"],
+            Some("Cmd+]"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            |s, _| arrange(s, Arrange::Forward)
+        ),
+        cmd!(
+            "object.arrange.sendBackward",
+            "Send Backward",
+            ["Object", "Arrange"],
+            Some("Cmd+["),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            |s, _| arrange(s, Arrange::Backward)
+        ),
+        cmd!(
+            "object.arrange.sendToBack",
+            "Send to Back",
+            ["Object", "Arrange"],
+            Some("Cmd+Shift+["),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            |s, _| arrange(s, Arrange::Back)
+        ),
+        cmd!(
+            "object.arrange.sendToCurrentLayer",
+            "Send to Current Layer",
+            ["Object", "Arrange"],
+            None,
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            send_to_current_layer
+        ),
+        cmd!(
+            "object.group",
+            "Group",
+            ["Object"],
+            Some("Cmd+G"),
+            "{ids?: [id…] (selected first; default: the selection)} → {id}",
+            has_selection,
+            group
+        ),
+        cmd!(
+            "object.ungroup",
+            "Ungroup",
+            ["Object"],
+            Some("Cmd+Shift+G"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            ungroup
+        ),
+        cmd!(
+            "object.lock",
+            "Selection",
+            ["Object", "Lock"],
+            Some("Cmd+2"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            lock
+        ),
         cmd!("object.unlockAll", "Unlock All", ["Object"], Some("Cmd+Alt+2"), "{}", has_doc, unlock_all),
-        cmd!("object.hide", "Selection", ["Object", "Hide"], Some("Cmd+3"), "{}", has_selection, hide),
+        cmd!(
+            "object.hide",
+            "Selection",
+            ["Object", "Hide"],
+            Some("Cmd+3"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            hide
+        ),
         cmd!("object.showAll", "Show All", ["Object"], Some("Cmd+Alt+3"), "{}", has_doc, show_all),
-        cmd!("object.compoundPath.make", "Make", ["Object", "Compound Path"], Some("Cmd+8"), "{}", has_selection, compound_make),
+        cmd!(
+            "object.compoundPath.make",
+            "Make",
+            ["Object", "Compound Path"],
+            Some("Cmd+8"),
+            "{ids?: [id…] (selected first; default: the selection)}",
+            has_selection,
+            compound_make
+        ),
         cmd!(
             "object.compoundPath.release",
             "Release",
             ["Object", "Compound Path"],
             Some("Cmd+Alt+Shift+8"),
-            "{} release the selected compound paths into their paths, each with the compound path's paint; a path of several subpaths (an SVG `d` with several `M`s) splits into one path per subpath",
+            "{ids?: [id…] (selected first; default: the selection)} release the selected compound paths into their paths, each with the compound path's paint; a path of several subpaths (an SVG `d` with several `M`s) splits into one path per subpath",
             has_selection,
             compound_release
         ),
@@ -128,7 +196,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Make",
             ["Object", "Clipping Mask"],
             Some("Cmd+7"),
-            "{} the topmost selected object (a path, compound path or text, which loses its paint) clips the others: compound holes, even-odd fills and glyph outlines clip as drawn. Paint given to the clipping path later (paint commands with its id) shows: its fill behind the clipped art, its stroke over it → {id} of the clip group",
+            "{ids?: [id…] (selected first; default: the selection)} the topmost selected object (a path, compound path or text, which loses its paint) clips the others: compound holes, even-odd fills and glyph outlines clip as drawn. Paint given to the clipping path later (paint commands with its id) shows: its fill behind the clipped art, its stroke over it → {id} of the clip group",
             has_multi,
             clip_make
         ),
@@ -137,7 +205,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Release",
             ["Object", "Clipping Mask"],
             Some("Cmd+Alt+7"),
-            "{} the selected clip groups become plain groups; their clipping path (path, compound path or text) stays, with the paint it has (none unless painted after Make)",
+            "{ids?: [id…] (selected first; default: the selection)} the selected clip groups become plain groups; their clipping path (path, compound path or text) stays, with the paint it has (none unless painted after Make)",
             has_selection,
             clip_release
         ),
@@ -297,11 +365,16 @@ pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf
     let objects = transforms_objects(p);
     let mut sc = if Scaling::factor(xf).is_some() { scaling(s, p) } else { Scaling::default() };
     sc.patterns = transform_patterns(s, p, &ids)?;
+    let c = xf.as_coeffs();
+    let is_translation = (c[0] - 1.0).abs() < 1e-9 && c[1].abs() < 1e-9 && c[2].abs() < 1e-9 && (c[3] - 1.0).abs() < 1e-9;
+    let delta = Vec2::new(c[4], c[5]);
+    let with_guides = objects && ids_param(p, "ids").is_none() && is_translation;
+    let has_guides = with_guides && !s.doc()?.selection.guides.is_empty();
     // A transform of ids that name no object, or an identity transform without a copy, moves
     // nothing: the document and its undo history stay as they are, and Transform Again repeats it.
     // With a copy, the reply lists the copies, and there are none.
     let d = &s.doc()?.doc;
-    let none = d.index_paths(ids.iter().copied()).is_empty();
+    let none = d.index_paths(ids.iter().copied()).is_empty() && !has_guides;
     let ids = if anchors && objects && !copy && !s.doc()?.selection.anchors.is_empty() {
         if xf != Affine::IDENTITY {
             super::path::transform_anchors(s, label, xf, sc)?;
@@ -310,7 +383,7 @@ pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf
     } else if none || (!copy && xf == Affine::IDENTITY) {
         if copy { vec![] } else { ids }
     } else {
-        let kept = if copy { preview_copies(s, &ids)? } else { None };
+        let kept = if copy { preview_copies(s, &ids, with_guides)? } else { None };
         s.edit(label, |d, sel| {
             let targets = match &kept {
                 // The document becomes the snapshot with the kept copies, untransformed, and the
@@ -320,7 +393,21 @@ pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf
                     sel.clone_from(&k.selection);
                     k.ids.clone()
                 }
-                None if copy => duplicate_in(d, sel, &ids, Affine::IDENTITY)?,
+                None if copy => {
+                    let guide_copies = if with_guides {
+                        let copies: Vec<_> = sel.guides.iter().filter_map(|&i| d.guides.get(i).cloned()).collect();
+                        (!copies.is_empty()).then_some(copies)
+                    } else {
+                        None
+                    };
+                    let new_ids = duplicate_in(d, sel, &ids, Affine::IDENTITY)?;
+                    if let Some(copies) = guide_copies {
+                        let first = d.guides.len();
+                        d.guides.extend(copies);
+                        sel.guides = (first..d.guides.len()).collect();
+                    }
+                    new_ids
+                }
                 None => ids.clone(),
             };
             // Transforms don't move nodes in the tree, so the paths found up front stay right.
@@ -330,6 +417,13 @@ pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf
                     && !(objects && areas && resize_type_area(n, xf))
                 {
                     transform_node(n, xf, sc, objects);
+                }
+            }
+            if with_guides && (delta.x != 0.0 || delta.y != 0.0) {
+                for i in sel.guides.clone() {
+                    if let Some(g) = d.guides.get_mut(i) {
+                        *g = g.moved(delta);
+                    }
                 }
             }
             Ok(targets)
@@ -355,21 +449,30 @@ pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf
 /// untransformed, and the interaction keeps that clone. It returns `None` outside an interaction,
 /// and when the document is no longer the snapshot, as for a command run in a typing session or a
 /// script batch after an earlier edit there: the command then copies the current document.
-pub(crate) fn preview_copies(s: &mut Session, roots: &[NodeId]) -> Result<Option<Arc<crate::PreviewCopies>>> {
+pub(crate) fn preview_copies(s: &mut Session, roots: &[NodeId], with_guides: bool) -> Result<Option<Arc<crate::PreviewCopies>>> {
     let st = s.doc_mut()?;
     let Some(it) = &mut st.interaction else { return Ok(None) };
     if !Arc::ptr_eq(&st.doc, &it.doc) {
         return Ok(None);
     }
+    let has_guide_copies = with_guides && !st.selection.guides.is_empty();
     if let Some(k) = &it.copies
         && Arc::ptr_eq(&k.from, &it.doc)
         && k.roots == roots
+        && (!k.selection.guides.is_empty() == has_guide_copies)
     {
         return Ok(Some(k.clone()));
     }
     let mut doc = it.doc.clone();
     let mut selection = st.selection.clone();
     let ids = duplicate_in(Arc::make_mut(&mut doc), &mut selection, roots, Affine::IDENTITY)?;
+    if has_guide_copies {
+        let d = Arc::make_mut(&mut doc);
+        let first = d.guides.len();
+        let copies: Vec<_> = st.selection.guides.iter().filter_map(|&i| d.guides.get(i).cloned()).collect();
+        d.guides.extend(copies);
+        selection.guides = (first..d.guides.len()).collect();
+    }
     let k = Arc::new(crate::PreviewCopies { from: it.doc.clone(), roots: roots.to_vec(), doc, selection, ids });
     it.copies = Some(k.clone());
     Ok(Some(k))
@@ -389,7 +492,7 @@ fn resize_type_area(n: &mut Node, xf: Affine) -> bool {
 fn transform(s: &mut Session, p: &Value) -> Result<Value> {
     let m = matrix_param(p, "matrix").ok_or_else(|| bad("object.transform", "missing matrix [a,b,c,d,e,f]"))?;
     let (ids, anchors) = match ids_param(p, "ids") {
-        Some(v) => (v, false),
+        Some(v) => (outermost(&s.doc()?.doc, v), false),
         None => (selected_roots(s)?, bool_or(p, "anchors", false)),
     };
     apply_transform(s, "Transform", ids, m, p, anchors)
